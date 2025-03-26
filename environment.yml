@@ -1,4 +1,4 @@
-name: myenv
+name: pose
 channels:
   - defaults
 dependencies:
