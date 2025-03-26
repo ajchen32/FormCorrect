@@ -10,7 +10,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 #needed for the newer version of mediapipe
 
-model_path = "C:/Users/soohw/Downloads/pose_landmarker_full.task"
+model_path = "model/pose_landmarker_full.task"
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -182,7 +182,7 @@ def proccess_frame(file_path):
     cap.release()
     cv2.destroyAllWindows()
 
-proccess_frame("C:/Users/soohw/Downloads/pose_test_vid.mp4.mp4")
+proccess_frame("examples\WIN_20250326_15_39_18_Pro.mp4")
 
 
 
