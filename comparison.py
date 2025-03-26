@@ -23,6 +23,13 @@ def draw_mismatched_boxes(image1_path, image2_path, joints_dict1, joints_dict2, 
                 x2, y2, w2, h2 = box2
                 cv2.rectangle(image2, (x2, y2), (x2 + w2, y2 + h2), (0, 0, 255), 2)  # Red box for mismatch
                 cv2.putText(image2, f"{joint} (actual)", (x2, y2 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+
+                # Draw a line connecting the center of the green box to the center of the red box
+                center_green = (x1 + w1 // 2, y1 + h1 // 2)
+                center_red = (x2 + w2 // 2, y2 + h2 // 2)
+                cv2.line(image2, center_green, center_red, (255, 255, 0), 2)  # Yellow line for connection
+                # Draw an arrow from the red box center to the green box center
+                cv2.arrowedLine(image2, center_red, center_green, (255, 0, 0), 2, tipLength=0.05)  # Blue arrow
         else:
             print(f"Joint '{joint}' not found in the second dictionary.")
 
@@ -34,11 +41,10 @@ def draw_mismatched_boxes(image1_path, image2_path, joints_dict1, joints_dict2, 
 if __name__ == "__main__":
     # Example dictionaries of joints and bounding boxes
     joints_dict1 = {
-        #"joint1": (50, 50, 100, 100),
+#"joint1": (50, 50, 100, 100),
         "joint2": (700, 200, 200, 200),
     }
-    joints_dict2 = {
-        #"joint1": (50, 50, 100, 100),
+    joints_dict2  = {    #"joint1": (50, 50, 100, 100),
         "joint2": (1300, 200, 200, 200),  # Mismatch
     }
 
