@@ -1,0 +1,9 @@
+numpy
+opencv-contrib-python
+mediapipe
+tensorflow
+matplotlib
+scipy
+pillow
+requests
+ffmpeg-python
