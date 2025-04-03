@@ -4,6 +4,7 @@ import ffmpeg
 import subprocess
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 
 import mediapipe as mp
 from mediapipe.tasks import python
@@ -125,7 +126,7 @@ def proccess_frame(file_path):
     
     screen_width = 1280
     screen_height = 720
-    world_coord_list = []
+    world_coord_array = np.empty((0, 33, 3))
     with PoseLandmarker.create_from_options(setup) as landmarker:
         while True:
             ret, frame = cap.read()
@@ -144,7 +145,7 @@ def proccess_frame(file_path):
 
             pose_landmarker = landmarker.detect_for_video(new_image, timestamp_ms)
             #detects pose landmarks in this frame
-
+            ax.cla()
             if pose_landmarker.pose_world_landmarks:
                 #btw this library or this function can detect multiple poses
                 #ie if there are multiple ppl in the frame
@@ -155,14 +156,29 @@ def proccess_frame(file_path):
                     #        [ [x0, y0, z0], [x1, y1, z1], ..., [x32, y32, z32] ],  # Frame 1
                     #        ...
                     #    ]
-                world_coord_list.append([[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks])
+                frame_landmark = np.array([[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks])
+                world_coord_array = np.vstack([world_coord_array, frame_landmark[np.newaxis, :, :]])
+                # I changed the code using np.vstack to now create a 3d array that stores number of frames x (xyz) x 33 points
                 
                 #for output printing purposes
                 # frame_landmark = [[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks]
                 # for landmark_idx, (x, y, z) in enumerate(frame_landmark):
                 #     print(f"  Landmark {landmark_idx}: x={x:.4f}, y={y:.4f}, z={z:.4f}")
-            
-            world_coord_array = np.array(world_coord_list)
+
+                ax.scatter(frame_landmark[:, 0], frame_landmark[:, 1], frame_landmark[:, 2], c="c", marker="o")
+                
+                for connection in mp.solutions.pose.POSE_CONNECTIONS:
+                    idx1, idx2 = connection
+                    x_vals = [frame_landmark[idx1, 0], frame_landmark[idx2, 0]]
+                    y_vals = [frame_landmark[idx1, 1], frame_landmark[idx2, 1]]
+                    z_vals = [frame_landmark[idx1, 2], frame_landmark[idx2, 2]]
+                    ax.plot(x_vals, y_vals, z_vals, "b", linewidth = 2)
+
+                # ax.view_init(elev=15, azim=-90)
+                # plt.show()
+            plt.draw()
+            plt.pause(0.01)
+
 
             # for frame_idx, frame_landmarks in enumerate(world_coord_array):
             #     print(f"Frame {frame_idx + 1}:")
@@ -182,7 +198,15 @@ def proccess_frame(file_path):
     cap.release()
     cv2.destroyAllWindows()
 
-proccess_frame("C:/Users/soohw/Downloads/pose_test_vid.mp4.mp4")
+fig = plt.figure(figsize = (6, 6))
+ax = fig.add_subplot(111, projection="3d")
+
+ax.set_xlabel("X (meters)")
+ax.set_ylabel("Y (meters)")
+ax.set_zlabel("Z (meters)")
+ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
+
+proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
 
 
 
