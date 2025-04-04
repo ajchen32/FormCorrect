@@ -1,0 +1,60 @@
+0. Shift structure by 100.0 on the y_axis.
+1. Shift structure by 100.0 on the y_axis.
+2. Shift structure by 100.0 on the y_axis.
+3. Shift structure by 100.0 on the y_axis.
+5. Shift structure by 50.0 on the y_axis.
+6. Shift structure by 50.0 on the y_axis.
+7. Shift structure by 50.0 on the y_axis.
+8. Shift structure by 50.0 on the y_axis.
+10. Shift structure by 25.0 on the y_axis.
+11. Shift structure by 25.0 on the y_axis.
+12. Shift structure by 25.0 on the y_axis.
+13. Shift structure by 25.0 on the y_axis.
+15. Shift structure by -12.5 on the x_axis.
+16. Shift structure by 12.5 on the y_axis.
+17. Rotate point 0 around point 1 by 1.40625 degrees.
+19. Shift structure by 3.125 on the y_axis.
+20. Shift structure by 3.125 on the y_axis.
+21. Rotate point 2 around point 1 by 0.3515625 degrees.
+22. Shift structure by 1.5625 on the y_axis.
+23. Rotate point 2 around point 1 by 0.17578125 degrees.
+24. Shift structure by 0.78125 on the y_axis.
+25. Shift structure by 0.78125 on the y_axis.
+26. Rotate point 0 around point 1 by 0.17578125 degrees.
+28. Shift structure by 0.1953125 on the y_axis.
+29. Shift structure by 0.1953125 on the y_axis.
+31. Shift structure by 0.09765625 on the y_axis.
+33. Shift structure by -0.048828125 on the y_axis.
+34. Rotate point 2 around point 1 by -0.0054931640625 degrees.
+35. Shift structure by -0.0244140625 on the y_axis.
+37. Shift structure by -0.01220703125 on the y_axis.
+38. Shift structure by -0.01220703125 on the y_axis.
+39. Shift structure by -0.01220703125 on the y_axis.
+40. Rotate point 2 around point 1 by -0.001373291015625 degrees.
+41. Shift structure by -0.006103515625 on the y_axis.
+42. Rotate point 0 around point 1 by -0.001373291015625 degrees.
+44. Shift structure by -0.00152587890625 on the y_axis.
+46. Rotate point 0 around point 1 by -0.000171661376953125 degrees.
+47. Shift structure by -0.0003814697265625 on the y_axis.
+48. Rotate point 2 around point 1 by -8.58306884765625e-05 degrees.
+50. Shift structure by -9.5367431640625e-05 on the y_axis.
+51. Shift structure by -9.5367431640625e-05 on the y_axis.
+52. Shift structure by -9.5367431640625e-05 on the y_axis.
+55. Shift structure by -2.384185791015625e-05 on the y_axis.
+56. Rotate point 0 around point 1 by -5.364418029785156e-06 degrees.
+58. Shift structure by -5.9604644775390625e-06 on the y_axis.
+59. Shift structure by -5.9604644775390625e-06 on the y_axis.
+61. Shift structure by 2.9802322387695312e-06 on the x_axis.
+63. Shift structure by -1.4901161193847656e-06 on the x_axis.
+66. Rotate point 2 around point 1 by -8.381903171539307e-08 degrees.
+68. Rotate point 2 around point 1 by 4.190951585769653e-08 degrees.
+69. Rotate point 2 around point 1 by 4.190951585769653e-08 degrees.
+70. Rotate point 2 around point 1 by -4.190951585769653e-08 degrees.
+72. Shift structure by 5.820766091346741e-09 on the x_axis.
+73. Shift structure by 5.820766091346741e-09 on the y_axis.
+74. Shift structure by 5.820766091346741e-09 on the y_axis.
+87. Shift structure by -1.4210854715202004e-12 on the x_axis.
+88. Shift structure by -1.4210854715202004e-12 on the x_axis.
+89. Rotate point 2 around point 1 by 2.5579538487363607e-12 degrees.
+92. Shift structure by 1.7763568394002505e-13 on the x_axis.
+93. Shift structure by 1.7763568394002505e-13 on the x_axis.
