@@ -11,7 +11,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 #needed for the newer version of mediapipe
 
-model_path = "model/pose_landmarker_full.task"
+model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -81,9 +81,9 @@ def original_video_orientation(file_path):
 
     # Determine orientation based on aspect ratio
     if height > width:
-        return 0  
+        return 90  
     else:
-        return 90 
+        return 0 
     #be careful the code does not support if it were to change the resolution mid video
 
 def rotate(frame, rotation):
@@ -151,12 +151,14 @@ def proccess_frame(file_path):
                 #ie if there are multiple ppl in the frame
                 #hence why we use the 0 index because we want the most prominent person's pose
                 pose_world_landmarks = pose_landmarker.pose_world_landmarks[0]
+                
                     #[
                     #        [ [x0, y0, z0], [x1, y1, z1], ..., [x32, y32, z32] ],  # Frame 0
                     #        [ [x0, y0, z0], [x1, y1, z1], ..., [x32, y32, z32] ],  # Frame 1
                     #        ...
                     #    ]
                 frame_landmark = np.array([[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks])
+                height, width, _ = frame.shape
                 world_coord_array = np.vstack([world_coord_array, frame_landmark[np.newaxis, :, :]])
                 # I changed the code using np.vstack to now create a 3d array that stores number of frames x (xyz) x 33 points
                 
@@ -197,8 +199,64 @@ def proccess_frame(file_path):
 
     cap.release()
     cv2.destroyAllWindows()
+#generated with copilot
+def proccess_frame2d(file_path):
+    rotation = get_metadata_rotation(file_path)
 
+    print(rotation)
+    if rotation == 0:
+        rotation = original_video_orientation(file_path)
+    print(rotation)
 
+    cap = cv2.VideoCapture(file_path)
+    if not cap.isOpened():
+        raise ValueError("Could not open video file.")
+    
+    screen_width = 1280
+    screen_height = 720
+
+    with PoseLandmarker.create_from_options(setup) as landmarker:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Rotate and resize the frame
+            frame = rotate(frame, rotation)
+            frame = resize(frame, screen_height, screen_width)
+            
+            new_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+            timestamp_ms = int(cap.get(cv2.CAP_PROP_POS_MSEC))
+            pose_landmarker = landmarker.detect_for_video(new_image, timestamp_ms)
+
+            if pose_landmarker.pose_world_landmarks:
+                pose_world_landmarks = pose_landmarker.pose_world_landmarks[0]
+                frame_landmark = np.array([[landmark.x, landmark.y] for landmark in pose_world_landmarks])
+
+                # Convert normalized coordinates to pixel coordinates
+                height, width, _ = frame.shape
+                frame_landmark[:, 0] *= width/2  # Scale x to image width
+                frame_landmark[:, 1] *= height/2  # Scale y to image height
+                frame_landmark[:, 0] += width/2
+                frame_landmark[:, 1,] += height/2
+                # Draw landmarks on the frame
+                for x, y in frame_landmark:
+                    cv2.circle(frame, (int(x), int(y)), 5, (0, 255, 0), -1)  # Green circles for landmarks
+
+                # Draw connections between landmarks
+                for connection in mp.solutions.pose.POSE_CONNECTIONS:
+                    idx1, idx2 = connection
+                    pt1 = tuple(int(coord) for coord in frame_landmark[idx1])
+                    pt2 = tuple(int(coord) for coord in frame_landmark[idx2])
+                    cv2.line(frame, pt1, pt2, (255, 0, 0), 2)  # Blue lines for connections
+
+            # Display the frame with landmarks
+            cv2.imshow("Video with Pose Landmarks", frame)
+            if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit
+                break
+
+    cap.release()
+    cv2.destroyAllWindows()
 fig = plt.figure(figsize = (6, 6))
 ax = fig.add_subplot(111, projection="3d")
 
@@ -207,8 +265,7 @@ ax.set_ylabel("Y (meters)")
 ax.set_zlabel("Z (meters)")
 ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
 
-proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
-
+proccess_frame2d(r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4")
 
 
 
