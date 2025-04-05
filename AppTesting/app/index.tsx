@@ -44,7 +44,7 @@ export default function VideoUploader() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Upload a Video</Text>
-      <input type="file" onChange={handleFileChange} />
+      <input type="file" accept='video/*' onChange={handleFileChange} />
         <View style={styles.videoContainer}>
           {videoURL && (
           <video 
