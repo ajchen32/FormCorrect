@@ -1,167 +1,71 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, Platform, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Video } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import axios from 'axios'; // You can also use 'fetch' if you prefer
-let videoSrc : string = ''; //URI of the file chosen
 
 export default function VideoUploader() {
-  const [videoUri, setVideoUri] = useState(String);
-  const [loading, setLoading] = useState(false);
-  let selectedFile : File;
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoURL, setVideoURL] = useState('');
+  const [loading, setStatus] = useState(Boolean);
 
-  const checkOS = async () => {
-
-  }
-
-  // Request permission for media access
-  const requestPermissions = async () => {
-    if (Platform.OS != 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to pick videos!');
-      }
-    }
-    else{
-    }
-  };
-
-  // WEB------------------------
+  // Do something if selected a different file
   const handleFileChange = (event : any) => {
-    selectedFile = event.target.files[0];
-    console.log(selectedFile);
-    
+    if (event){ //Add  [&& event.currentTarget.files[0].type == 'video/mp4'] to enforce a certain type
+      setVideoFile(event.currentTarget.files[0]);
+      setVideoURL(URL.createObjectURL(event.currentTarget.files[0]));
+      setStatus(false);
+    }
   };
 
-  //Working on this right now------------
-  const webUploadVideo = async () => {
+  const UploadVideo = async () => {
+    // Create a FormData object to send the file
     const formData = new FormData();
-
-    formData.append('video', selectedFile);
-    // You can use either fetch or axios for making the request
-    const response = await fetch('/upload', { // Replace with your backend endpoint
-      method: 'POST',
-      body: formData,
-    });
-
-    if (response.status === 200) {
-      Alert.alert('Success', 'Video uploaded successfully!');
-    } else {
-      Alert.alert('Error', 'Failed to upload the video');
+    if (videoFile != null){
+      formData.append('file', videoFile);
     }
-  }
-
-  // IOS/ANDRIOID MAYBE--------------------------
-  // Function to handle video selection
-  const pickVideo = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['videos'],
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      console.log(result.assets[0].uri);
-      setVideoUri(result.assets[0].uri); }
-    }
-
-  // Function to upload the video to the server
-  const uploadVideo = async () => {
-    if (!videoUri) {
-      alert('Please select a video first!');
-      return;
-    }
-
-    setLoading(true);
-
+    setStatus(true);
     try {
-        // Prepare the form data for the video upload
-      const formData = new FormData();
-      formData.append('video', new Blob([videoUri], {type: 'video/mp4'}));
-
-      const response = await fetch('', {
+      const response = await fetch('http://localhost:5000/upload', {
         method: 'POST',
-        body: formData, // Form data containing the video
-        headers: {
-          // Do not manually set Content-Type; let fetch do it automatically
-        },
+        body: formData,
       });
-      // Check if the request was successful
+
       if (response.ok) {
-        Alert.alert('Success', 'Video uploaded successfully!');
+        alert('File uploaded successfully!');
       } else {
-        const errorMessage = await response.text();
-        Alert.alert('Error', errorMessage || 'Failed to upload the video');
+        alert('Failed to upload file.');
       }
-      // }
-      
     } catch (error) {
-      console.error('Upload failed:', error);
-      Alert.alert('Error', 'Failed to upload the video');
-    } finally {
-      setLoading(false);
+      console.error('Error uploading file:', error);
+      alert('Error uploading file.');
     }
+    setStatus(false);
   };
 
-  // No clue what this is
-  React.useEffect(() => {
-    requestPermissions();
-  }, []);
+  
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Upload a Video</Text>
+      <input type="file" accept='video/*' onChange={handleFileChange} />
+        <View style={styles.videoContainer}>
+          {videoURL && (
+          <video 
+            width="600" 
+            height="400" 
+            controls 
+            src={videoURL} // Set the video source to the URL created with createObjectURL
+          >
+            Your browser does not support the video tag.
+          </video>)}
 
-  // Check the current OS
-  if (Platform.OS == 'web'){
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Upload a Video</Text>
-        <input type="file" onChange={handleFileChange} />
-        {videoUri && (
-          <View style={styles.videoContainer}>
-            <Video
-              source={{ uri: videoUri }}
-              style={styles.video}
-              useNativeControls
-              isLooping
-            />
-          </View>
-        )}
-        {(
-          <Button
-            title={loading ? 'Uploading...' : 'Upload Video'}
-            onPress={webUploadVideo}
-            disabled={loading}
-          />
-        )}
-      </View>
-    );
-  }
-  else{
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Upload a Video</Text>
-        <Button title="Pick a Video" onPress={pickVideo} />
-        {videoUri && (
-          <View style={styles.videoContainer}>
-            <Video
-              source={{ uri: videoUri }}
-              style={styles.video}
-              useNativeControls
-              isLooping
-            />
-          </View>
-        )}
-        {videoUri && (
-          <Button
-            title={loading ? 'Uploading...' : 'Upload Video'}
-            onPress={uploadVideo}
-            disabled={loading}
-          />
-        )}
-      </View>
-    );
-  }
+          {videoFile && (
+            <Button
+              title={loading ? 'Uploading...' : 'Upload Video'}
+              onPress={UploadVideo}/>)}
+
+        </View>
+    </View>
+  );
 }
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
