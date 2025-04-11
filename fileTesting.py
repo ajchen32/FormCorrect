@@ -16,19 +16,34 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Route to handle file upload
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+    # Check if exactly two files are provided
+    if len(request.files) != 2:
+        return jsonify({"error": "Exactly two files are required"}), 400
 
-    file = request.files['file']
+    # Get the files by their field names
+    file1 = request.files.get('file1')
+    file2 = request.files.get('file2')
 
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    # Validate the files
+    if not file1 or file1.filename == '':
+        return jsonify({"error": "First file is missing or has no filename"}), 400
+    if not file2 or file2.filename == '':
+        return jsonify({"error": "Second file is missing or has no filename"}), 400
 
-    # Save the file to the server
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(file_path)
+    # Save the files to the server
+    file1_path = os.path.join(app.config['UPLOAD_FOLDER'], file1.filename)
+    file2_path = os.path.join(app.config['UPLOAD_FOLDER'], file2.filename)
+    file1.save(file1_path)
+    file2.save(file2_path)
 
-    return jsonify({"message": "File uploaded successfully", "file": file.filename}), 200
+    return jsonify({
+        "message": "Files uploaded successfully",
+        "files": [file1.filename, file2.filename]
+    }), 200
+
+@app.route('/test', methods=['GET'])
+def test():
+    return jsonify({"message": "Test endpoint"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
