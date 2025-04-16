@@ -11,7 +11,9 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 #needed for the newer version of mediapipe
 
-model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+
+model_path = "c:/Users/soohw/Downloads/pose_landmarker_heavy.task"
+
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -265,8 +267,4 @@ ax.set_ylabel("Y (meters)")
 ax.set_zlabel("Z (meters)")
 ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
 
-proccess_frame2d(r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4")
-
-
-
-
+proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
