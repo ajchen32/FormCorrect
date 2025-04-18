@@ -14,7 +14,9 @@ from scipy import linalg as la
 #from numpy import linalg
 
 
+
 model_path = "c:/Users/soohw/Downloads/pose_landmarker_heavy.task"
+
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -255,3 +257,6 @@ cov_matrix_z = np.cov(world_array_z_centered, rowvar=False)
 
 def covaraince_matrix():
     return
+
+proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
+
