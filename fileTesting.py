@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 
+from pose import proccess_frame
+#getting the algorthim to extract points and edges; #returns 3d numpy array of points and then 4d for edges
+
 # Enable CORS for all routes
 app = Flask(__name__)
 CORS(app)
@@ -35,6 +38,9 @@ def upload_file():
     file2_path = os.path.join(app.config['UPLOAD_FOLDER'], file2.filename)
     file1.save(file1_path)
     file2.save(file2_path)
+
+    world_coord_array, edges_array = proccess_frame(file1_path)
+    world_coord_array_1, edges_array_1 = proccess_frame(file2_path)
 
     return jsonify({
         "message": "Files uploaded successfully",
