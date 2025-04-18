@@ -15,7 +15,7 @@ from scipy import linalg as la
 
 
 
-model_path = "c:/Users/soohw/Downloads/pose_landmarker_heavy.task"
+model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 
 
 BaseOptions = mp.tasks.BaseOptions
@@ -118,7 +118,7 @@ def resize(frame, max_height, max_width):
 
 def proccess_frame(file_path):
     rotation = get_metadata_rotation(file_path)
-
+    graph = __name__ == "__main__"
     print(rotation)
     # Step 2: If no metadata, use fallback logic
     if rotation == 0:
@@ -152,7 +152,8 @@ def proccess_frame(file_path):
 
             pose_landmarker = landmarker.detect_for_video(new_image, timestamp_ms)
             #detects pose landmarks in this frame
-            ax.cla()
+            if graph:
+                ax.cla()
             if pose_landmarker.pose_world_landmarks:
                 #btw this library or this function can detect multiple poses
                 #ie if there are multiple ppl in the frame
@@ -176,22 +177,24 @@ def proccess_frame(file_path):
                 # frame_landmark = [[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks]
                 # for landmark_idx, (x, y, z) in enumerate(frame_landmark):
                 #     print(f"  Landmark {landmark_idx}: x={x:.4f}, y={y:.4f}, z={z:.4f}")
-
-                ax.scatter(frame_landmark[:, 0], frame_landmark[:, 1], frame_landmark[:, 2], c="c", marker="o")
+                if graph:
+                    ax.scatter(frame_landmark[:, 0], frame_landmark[:, 1], frame_landmark[:, 2], c="c", marker="o")
                 frame_edges = []
                 for connection in mp.solutions.pose.POSE_CONNECTIONS:
                     idx1, idx2 = connection
                     x_vals = [frame_landmark[idx1, 0], frame_landmark[idx2, 0]]
                     y_vals = [frame_landmark[idx1, 1], frame_landmark[idx2, 1]]
                     z_vals = [frame_landmark[idx1, 2], frame_landmark[idx2, 2]]
-                    ax.plot(x_vals, y_vals, z_vals, "b", linewidth = 2)
+                    if graph:
+                        ax.plot(x_vals, y_vals, z_vals, "b", linewidth = 2)
                     point1 = frame_landmark[idx1]
                     point2 = frame_landmark[idx2]
                     frame_edges.append([point1, point2])
     
                 edges_array.append(np.array(frame_edges))
-            plt.draw()
-            plt.pause(0.01)
+            if graph:
+                plt.draw()
+                plt.pause(0.01)
 
 
             # for frame_idx, frame_landmarks in enumerate(world_coord_array):
@@ -205,9 +208,10 @@ def proccess_frame(file_path):
             #if u do want to run any of these print statements u can press q to exit and it will still print a decent amount
 
             # Display the frame 
-            cv2.imshow("Video", frame)
-            if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit
-                break
+            if graph:
+                cv2.imshow("Video", frame)
+                if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit
+                    break
     world_coord_array = np.array(world_coord_list)
     edges_array = np.array(edges_array)
     print("Edge array shape:", edges_array.shape)
@@ -224,39 +228,39 @@ ax.set_xlabel("X (meters)")
 ax.set_ylabel("Y (meters)")
 ax.set_zlabel("Z (meters)")
 ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
+if(__name__ == "__main__"):
+    world_array, edge_array = proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
 
-world_array, edge_array = proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
+    #world array is (num_Frames, 33, 3)
+    #I need it to be by number of (keypoints, data) ie flatten the keypoints and insert tuples?
+    #nah tuples is better for visualization and actual working with data but covaraince is best done accross each axis
 
-#world array is (num_Frames, 33, 3)
-#I need it to be by number of (keypoints, data) ie flatten the keypoints and insert tuples?
-#nah tuples is better for visualization and actual working with data but covaraince is best done accross each axis
+    world_array_x = world_array[:, :, 0]
+    world_array_y = world_array[:, :, 1]
+    world_array_z = world_array[:, :, 2]
+    #(num_frames, 33)
 
-world_array_x = world_array[:, :, 0]
-world_array_y = world_array[:, :, 1]
-world_array_z = world_array[:, :, 2]
-#(num_frames, 33)
+    num_of_frames = world_array_x.shape[0]
+    num_of_points = world_array_x.shape[1]
 
-num_of_frames = world_array_x.shape[0]
-num_of_points = world_array_x.shape[1]
+    print (num_of_frames)
+    print(num_of_points)
 
-print (num_of_frames)
-print(num_of_points)
-
-average_keypoints = np.mean(world_array, axis=0)
-
-
-world_array_x_centered = world_array_x - average_keypoints[:, 0]
-world_array_y_centered = world_array_y - average_keypoints[:, 1]
-world_array_z_centered = world_array_z - average_keypoints[:, 2]
-print(np.mean(world_array_x_centered, axis=0))
-
-cov_matrix_x = np.cov(world_array_x_centered, rowvar=False)
-cov_matrix_y = np.cov(world_array_y_centered, rowvar=False)
-cov_matrix_z = np.cov(world_array_z_centered, rowvar=False)
+    average_keypoints = np.mean(world_array, axis=0)
 
 
-def covaraince_matrix():
-    return
+    world_array_x_centered = world_array_x - average_keypoints[:, 0]
+    world_array_y_centered = world_array_y - average_keypoints[:, 1]
+    world_array_z_centered = world_array_z - average_keypoints[:, 2]
+    print(np.mean(world_array_x_centered, axis=0))
 
-proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
+    cov_matrix_x = np.cov(world_array_x_centered, rowvar=False)
+    cov_matrix_y = np.cov(world_array_y_centered, rowvar=False)
+    cov_matrix_z = np.cov(world_array_z_centered, rowvar=False)
+
+
+    def covaraince_matrix():
+        return
+
+    proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
 
