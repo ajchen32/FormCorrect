@@ -4,6 +4,7 @@ from functools import partial
 from mpl_toolkits.mplot3d import Axes3D
 import copy
 import networkx as nx
+from collections import deque
 
 
 class Point:
@@ -11,20 +12,15 @@ class Point:
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
-
-
-class Node:
-    def __init__(
-        self, data: Point, rank: int
-    ):  # nodes that are in a loop will have the same rank
-        # in order for these to move, they need to all be rotated around a pivot of greater magnitude
-        self.data = data
-        self.rank = rank
+        self.rank  = -1
 
 
 def create_graph():
+    graph = nx.Graph()
+    graph.add_nodes_from(["A", "B", "C", "D","E","F"])
+    graph.add_edges_from([("A", "B"), ("B", "C"), ("B", "D"), ("B", "E"), ("A", "F"), ("D", "E")])
 
-    return
+    return graph
 
 
 def rotate_point_3D(
@@ -103,3 +99,26 @@ def align_main_joint(
     # this could be the hip for example so that the two hips are overlaid, after this, only rotatiion are necessary
 
     return
+
+def set_graph_ranks(main_joint, graph):
+   
+    # use the .popleft() to remove and get the next element
+    # once an element is removed the edges are added 
+   
+    
+    distances = nx.single_source_shortest_path_length(graph, source=main_joint)
+    print(distances)
+    cycles = nx.cycle_basis(graph)
+    print(cycles)
+        
+    
+def main():
+    graph= create_graph()
+    set_graph_ranks("A", graph)
+    
+    
+
+
+if __name__ == "__main__":
+    main()
+
