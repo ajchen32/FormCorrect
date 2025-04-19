@@ -39,8 +39,9 @@ def upload_file():
     file1.save(file1_path)
     file2.save(file2_path)
 
-    world_coord_array, edges_array = proccess_frame(file1_path)
-    world_coord_array_1, edges_array_1 = proccess_frame(file2_path)
+    #Commented these two things out since it wasn't working. File uploads correctly but something broke here. - CJ
+    # world_coord_array, edges_array = proccess_frame(file1_path)
+    # world_coord_array_1, edges_array_1 = proccess_frame(file2_path)
 
     return jsonify({
         "message": "Files uploaded successfully",
