@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, Button, StyleSheet, Platform, Alert } from "react-native";
 
+interface videoOutput {
+    file: any;
+    text: string;
+}
+
 export default function VideoUploader() {
     const [videoFile, setVideoFile] = useState(Array<any>);
     const [videoURL, setVideoURL] = useState(["", ""]);
     const [loading, setStatus] = useState(Boolean);
-
+    const [output, setOutput] = useState<videoOutput>({
+        file: null,
+        text: "placeholder",
+    });
     // Do something if selected a different file
     const LoadFile = (event: any, index: number) => {
         if (event) {
@@ -39,7 +47,7 @@ export default function VideoUploader() {
         const formData = new FormData();
         for (let i = 0; i < videoFile.length; i++) {
             if (videoFile[i] != null) {
-                formData.append(`file${i+1}`, videoFile[i]);
+                formData.append(`file${i + 1}`, videoFile[i]);
             }
         }
         setStatus(true);
@@ -51,6 +59,12 @@ export default function VideoUploader() {
 
             if (response.ok) {
                 alert(`File uploaded successfully!`);
+
+                let curr_output: videoOutput = output;
+                curr_output.file = videoFile[0];
+                curr_output.text = "Testing";
+                setOutput(curr_output);
+                console.log(output);
             } else {
                 alert(`Failed to upload file.`);
             }
@@ -62,68 +76,94 @@ export default function VideoUploader() {
     };
 
     return (
-        <View style={styles.upload_container}>
-            <Text style={styles.title}>Upload a Video</Text>
+        <div>
+            {output.file == null && (
+                <View style={styles.upload_container}>
+                    <Text style={styles.title}>Upload a Video</Text>
+                    <View style={styles.container}>
+                        <View style={styles.videoContainer}>
+                            <View style={styles.upload_button}>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(event) => LoadFile(event, 0)}
+                                />
+                                {videoURL[0] != "" && (
+                                    <button
+                                        onClick={(event) =>
+                                            DeleteFile(event, 0)
+                                        }
+                                    >
+                                        Delete
+                                    </button>
+                                )}
+                            </View>
 
-            <View style={styles.container}>
-                <View style={styles.videoContainer}>
-                    <View style={styles.upload_button}>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={(event) => LoadFile(event, 0)}
-                        />
-                        {videoURL[0] != "" && (
-                            <button onClick={(event) => DeleteFile(event, 0)}>
-                                Delete
-                            </button>
-                        )}
+                            {videoURL[0] && (
+                                <video
+                                    width="600"
+                                    height="400"
+                                    controls
+                                    src={videoURL[0]} // Set the video source to the URL created with createObjectURL
+                                >
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+                        </View>
+
+                        <View style={styles.videoContainer}>
+                            <View style={styles.upload_button}>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(event) => LoadFile(event, 1)}
+                                />
+                                {videoURL[1] != "" && (
+                                    <button
+                                        onClick={(event) =>
+                                            DeleteFile(event, 1)
+                                        }
+                                    >
+                                        Delete
+                                    </button>
+                                )}
+                            </View>
+
+                            {videoURL[1] && (
+                                <video
+                                    width="600"
+                                    height="400"
+                                    controls
+                                    src={videoURL[1]} // Set the video source to the URL created with createObjectURL
+                                >
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+                        </View>
                     </View>
-
-                    {videoURL[0] && (
-                        <video
+                    {
+                        <Button
+                            title={loading ? "Uploading..." : "Upload Video"}
+                            onPress={UploadVideo}
+                        />
+                    }
+                </View>
+            )}
+            {output.file != null && (
+                <View style={styles.upload_container}>
+                    <Text style={styles.title}>Output</Text>
+                    <video
                             width="600"
                             height="400"
                             controls
-                            src={videoURL[0]} // Set the video source to the URL created with createObjectURL
+                            src={URL.createObjectURL(output.file)} // Set the video source to the URL created with createObjectURL
                         >
                             Your browser does not support the video tag.
-                        </video>
-                    )}
+                    </video>
+                    <Text style={styles.output_text}> {output.text}</Text>
                 </View>
-
-                <View style={styles.videoContainer}>
-                    <View style={styles.upload_button}>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={(event) => LoadFile(event, 1)}
-                        />
-                        {videoURL[1] != "" && (
-                            <button onClick={(event) => DeleteFile(event, 1)}>
-                                Delete
-                            </button>
-                        )}
-                    </View>
-
-                    {videoURL[1] && (
-                        <video
-                            width="600"
-                            height="400"
-                            controls
-                            src={videoURL[1]} // Set the video source to the URL created with createObjectURL
-                        >
-                            Your browser does not support the video tag.
-                        </video>
-                    )}
-                </View>
-            </View>
-
-            <Button
-                title={loading ? "Uploading..." : "Upload Video"}
-                onPress={UploadVideo}
-            />
-        </View>
+            )}
+        </div>
     );
 }
 
@@ -139,6 +179,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         marginBottom: 20,
+        justifyContent: "center",
+    },
+    output_text: {
+        fontSize: 20,
+        margin: 20,
         justifyContent: "center",
     },
     upload_button: {
@@ -164,4 +209,3 @@ const styles = StyleSheet.create({
         padding: 16,
     },
 });
-	
