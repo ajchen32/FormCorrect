@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
 # Route to handle file upload and video generation
-@app.route('/generate-video', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def generate_video():
     # Check if exactly two files are provided
     if len(request.files) != 2:
@@ -40,6 +40,7 @@ def generate_video():
     file2_path = os.path.join(app.config['UPLOAD_FOLDER'], file2.filename)
     file1.save(file1_path)
     file2.save(file2_path)
+
 
     # Generate the video
     output_file_path = os.path.join(app.config['OUTPUT_FOLDER'], file1.filename)
@@ -64,6 +65,7 @@ def generate_video():
         content_type=f"multipart/form-data; boundary={boundary}"
     )
     return response
+
 
 @app.route('/test', methods=['GET'])
 def test():
