@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
-from videogen import createCorrectionVideo
+# from videogen import createCorrectionVideo
 
 # Enable CORS for all routes
 app = Flask(__name__)
@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
 # Route to handle file upload and video generation
-@app.route('/generate-video', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def generate_video():
     # Check if exactly two files are provided
     if len(request.files) != 2:
@@ -41,15 +41,17 @@ def generate_video():
     file1.save(file1_path)
     file2.save(file2_path)
 
-    # Generate the video
-    output_file_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output_video.mp4')
-    try:
-        createCorrectionVideo(file1_path, file2_path)
-    except Exception as e:
-        return jsonify({"error": f"Error generating video: {e}"}), 500
+    # # Generate the video (Commented out for now to test, also commented out import cus it broke server - CJ)
+    # output_file_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output_video.mp4')
+    # try:
+    #     createCorrectionVideo(file1_path, file2_path)
+    # except Exception as e:
+    #     return jsonify({"error": f"Error generating video: {e}"}), 500
 
-    # Send the generated video back to the caller
-    return send_file(output_file_path, as_attachment=True)
+    # # Send the generated video back to the caller
+    # return send_file(output_file_path, as_attachment=True)
+
+    return jsonify({"message": "Test endpoint"}), 200
 
 @app.route('/test', methods=['GET'])
 def test():
