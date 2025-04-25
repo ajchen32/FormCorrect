@@ -1,9 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
-
-from pose import proccess_frame
-#getting the algorthim to extract points and edges; #returns 3d numpy array of points and then 4d for edges
+from videogen import createCorrectionVideo
 
 # Enable CORS for all routes
 app = Flask(__name__)
@@ -11,14 +9,18 @@ CORS(app)
 
 # Create an upload folder if it doesn't exist
 UPLOAD_FOLDER = 'uploads'
+OUTPUT_FOLDER = 'output'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(OUTPUT_FOLDER):
+    os.makedirs(OUTPUT_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
-# Route to handle file upload
-@app.route('/upload', methods=['POST'])
-def upload_file():
+# Route to handle file upload and video generation
+@app.route('/generate-video', methods=['POST'])
+def generate_video():
     # Check if exactly two files are provided
     if len(request.files) != 2:
         return jsonify({"error": "Exactly two files are required"}), 400
@@ -39,13 +41,15 @@ def upload_file():
     file1.save(file1_path)
     file2.save(file2_path)
 
-    world_coord_array, edges_array = proccess_frame(file1_path)
-    world_coord_array_1, edges_array_1 = proccess_frame(file2_path)
+    # Generate the video
+    output_file_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output_video.mp4')
+    try:
+        createCorrectionVideo(file1_path, file2_path)
+    except Exception as e:
+        return jsonify({"error": f"Error generating video: {e}"}), 500
 
-    return jsonify({
-        "message": "Files uploaded successfully",
-        "files": [file1.filename, file2.filename]
-    }), 200
+    # Send the generated video back to the caller
+    return send_file(output_file_path, as_attachment=True)
 
 @app.route('/test', methods=['GET'])
 def test():
