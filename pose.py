@@ -14,7 +14,7 @@ from scipy import linalg as la
 
 # from numpy import linalg
 
-
+#r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 model_path = r"team-82-FormCorrect\UTF-8pose_landmarker_heavy.task"
 
 
@@ -146,7 +146,7 @@ def resize(frame, max_height, max_width):
 
 def proccess_frame(file_path):
     rotation = get_metadata_rotation(file_path)
-
+    graph = __name__ == "__main__"
     print(rotation)
     # Step 2: If no metadata, use fallback logic
     if rotation == 0:
@@ -179,8 +179,9 @@ def proccess_frame(file_path):
             # gets the timestamp for mediapipe
 
             pose_landmarker = landmarker.detect_for_video(new_image, timestamp_ms)
-            # detects pose landmarks in this frame
-            ax.cla()
+            #detects pose landmarks in this frame
+            if graph:
+                ax.cla()
             if pose_landmarker.pose_world_landmarks:
                 # btw this library or this function can detect multiple poses
                 # ie if there are multiple ppl in the frame
@@ -209,28 +210,24 @@ def proccess_frame(file_path):
                 # frame_landmark = [[landmark.x, landmark.y, landmark.z] for landmark in pose_world_landmarks]
                 # for landmark_idx, (x, y, z) in enumerate(frame_landmark):
                 #     print(f"  Landmark {landmark_idx}: x={x:.4f}, y={y:.4f}, z={z:.4f}")
-
-                ax.scatter(
-                    frame_landmark[:, 0],
-                    frame_landmark[:, 1],
-                    frame_landmark[:, 2],
-                    c="c",
-                    marker="o",
-                )
+                if graph:
+                    ax.scatter(frame_landmark[:, 0], frame_landmark[:, 1], frame_landmark[:, 2], c="c", marker="o")
                 frame_edges = []
                 for connection in mp.solutions.pose.POSE_CONNECTIONS:
                     idx1, idx2 = connection
                     x_vals = [frame_landmark[idx1, 0], frame_landmark[idx2, 0]]
                     y_vals = [frame_landmark[idx1, 1], frame_landmark[idx2, 1]]
                     z_vals = [frame_landmark[idx1, 2], frame_landmark[idx2, 2]]
-                    ax.plot(x_vals, y_vals, z_vals, "b", linewidth=2)
+                    if graph:
+                        ax.plot(x_vals, y_vals, z_vals, "b", linewidth = 2)
                     point1 = frame_landmark[idx1]
                     point2 = frame_landmark[idx2]
                     frame_edges.append([point1, point2])
                 edges_array.append(np.array(frame_edges))
-            plt.draw()
-            plt.pause(0.01)
-            
+            if graph:
+                plt.draw()
+                plt.pause(0.01)
+
 
             # for frame_idx, frame_landmarks in enumerate(world_coord_array):
             #     print(f"Frame {frame_idx + 1}:")
@@ -242,10 +239,11 @@ def proccess_frame(file_path):
 
             # if u do want to run any of these print statements u can press q to exit and it will still print a decent amount
 
-            # Display the frame
-            cv2.imshow("Video", frame)
-            if cv2.waitKey(25) & 0xFF == ord("q"):  # Press 'q' to exit
-                break
+            # Display the frame 
+            if graph:
+                cv2.imshow("Video", frame)
+                if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit
+                    break
     world_coord_array = np.array(world_coord_list)
     edges_array = np.array(edges_array)
     print("Edge array shape:", edges_array.shape)
@@ -350,6 +348,8 @@ ax.set_xlabel("X (meters)")
 ax.set_ylabel("Y (meters)")
 ax.set_zlabel("Z (meters)")
 ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
+if(__name__ == "__main__"):
+    world_array, edge_array = proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
 
 
 

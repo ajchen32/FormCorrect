@@ -3,3 +3,6 @@ model
 venv
 web-build
 #ignores the virtual env when commiting 
+output/output_test.avi
+output/output_test.mp4
+output/WIN_20250404_16_16_29_Pro.mp4
