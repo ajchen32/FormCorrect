@@ -7,3 +7,5 @@ scipy
 pillow
 requests
 ffmpeg-python
+flask
+flask_cors
