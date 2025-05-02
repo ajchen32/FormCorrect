@@ -15,8 +15,9 @@ from scipy import linalg as la
 # from numpy import linalg
 
 #r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
-model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+#model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 
+model_path = "model/pose_landmarker_full.task"
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -252,6 +253,7 @@ def proccess_frame(file_path):
     cv2.destroyAllWindows()
     return world_coord_array, edges_array
 
+#proccess_frame("examples\WIN_20250326_15_39_18_Pro.mp4")
 def process_frame_without_video_output(file_path): # just to leave original unmodified, processes the frames without the video output to increase speed
     rotation = get_metadata_rotation(file_path)
     if rotation == 0:
