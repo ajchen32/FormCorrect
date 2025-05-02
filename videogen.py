@@ -2,26 +2,58 @@ import cv2
 import numpy as np
 import os
 from pose import proccess_frame
-from RegressionModel.regressionmodel import run_regression, calc_dist
+from recursiveregressionmodel import actual_model
 import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 BG_COLOR = (192, 192, 192)
-def createCorrectedSet(output):
-    return {}
+def createCorrectedSet(strings):
+    #use body parts dict and look through the strings to find the body parts that are in the string
+    #and return the set of body parts
+    body_parts = {
+        0: "nose",
+        1: "left eye (inner)",
+        2: "left eye",
+        3: "left eye (outer)",
+        4: "right eye (inner)",
+        5: "right eye",
+        6: "right eye (outer)",
+        7: "left ear",
+        8: "right ear",
+        9: "mouth (left)",
+        10: "mouth (right)",
+        11: "left shoulder",
+        12: "right shoulder",
+        13: "left elbow",
+        14: "right elbow",
+        15: "left wrist",
+        16: "right wrist",
+        17: "left pinky",
+        18: "right pinky",
+        19: "left index",
+        20: "right index",
+        21: "left thumb",
+        22: "right thumb",
+        23: "left hip",
+        24: "right hip",
+        25: "left knee",
+        26: "right knee",
+        27: "left ankle",
+        28: "right ankle",
+        29: "left heel",
+        30: "right heel",
+        31: "left foot index",
+        32: "right foot index",
+    }
+    correctedSet = set()
+    for string in strings:
+        for i in range(len(body_parts)):
+            if body_parts[i] in string:
+                correctedSet.add(i)
+    return correctedSet
 def createCorrectionVideo(file_path1, file_path2):
-    world_coord_array1, _ = proccess_frame(file_path1)
-    world_coord_array2, _ = proccess_frame(file_path2)
 
-    joint_idx = 15
-    x_goal = world_coord_array2[:, joint_idx, 0]
-    y_goal = world_coord_array2[:, joint_idx, 1]
-    x_cor = world_coord_array1[:, joint_idx, 0]
-    y_cor = world_coord_array1[:, joint_idx, 1]
-
-    iterations = 10
-    change_array = np.array([10, 10], dtype=float)
 
     cap = cv2.VideoCapture(file_path1)
     if not cap.isOpened():
@@ -41,7 +73,7 @@ def createCorrectionVideo(file_path1, file_path2):
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Alternative codec
     out = cv2.VideoWriter(output_file_path, fourcc, fps, (frame_width, frame_height))
-
+    strings = []
     frame_idx = 0
     with mp_pose.Pose(
     static_image_mode=True,
@@ -54,18 +86,11 @@ def createCorrectionVideo(file_path1, file_path2):
                 if not ret:
                     break
 
-                if frame_idx >= len(x_cor) or frame_idx >= len(y_cor):
-                    print("Frame index exceeds coordinate array length. Stopping.")
-                    break
-
-                x_cor_frame = np.array([x_cor[frame_idx]])
-                y_cor_frame = np.array([y_cor[frame_idx]])
-                x_goal_frame = np.array([x_goal[frame_idx]])
-                y_goal_frame = np.array([y_goal[frame_idx]])
 
                 try:
-                    output = run_regression(x_goal_frame, y_goal_frame, x_cor_frame, y_cor_frame, iterations, change_array)
+                    strings, output = actual_model(file_path2, file_path1)
                 except Exception as e:
+                    print(file_path1, file_path2)
                     print(f"Error during regression: {e}")
                 correctedSet = createCorrectedSet(output)
                 # height, width, _ = frame.shape
@@ -96,7 +121,7 @@ def createCorrectionVideo(file_path1, file_path2):
                 mp_drawing.draw_landmarks(
                     annotated_image,
                     results.pose_landmarks,
-                    mp_pose.POSE_CONNECTIONS,
+                    filtered_connections,
                     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
                 out.write(annotated_image)
                 frame_idx += 1
@@ -104,12 +129,13 @@ def createCorrectionVideo(file_path1, file_path2):
             cap.release()
             out.release()
             print(f"Video saved at {output_file_path}")
+            return strings
 
 # Example usage
 if(__name__ == "__main__"):
     file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
     file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
-    createCorrectionVideo(file_path1, file_path2)
+    print(createCorrectionVideo(file_path1, file_path2))
 
 
 
