@@ -1,5 +1,6 @@
 C:/Users/soohw/anaconda3/envs/myenv/
 model
+#ignores the virtual env when commiting 
 venv
 web-build
 #ignores the virtual env when commiting 
