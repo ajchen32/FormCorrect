@@ -3,3 +3,7 @@ model
 venv
 web-build
 #ignores the virtual env when commiting 
+
+# Ignore Python cache files and directories
+__pycache__/
+*.py[cod]
