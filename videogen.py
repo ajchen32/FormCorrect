@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 import os
-from pose import proccess_frame
-from RegressionModel.regressionmodel import run_regression, calc_dist
+from pose import process_frame_without_video_output
+from recursiveregressionmodel import plot_output, actual_model, fake_actual_model, actual_model_modified
 import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -11,8 +11,8 @@ BG_COLOR = (192, 192, 192)
 def createCorrectedSet(output):
     return {}
 def createCorrectionVideo(file_path1, file_path2):
-    world_coord_array1, _ = proccess_frame(file_path1)
-    world_coord_array2, _ = proccess_frame(file_path2)
+    world_coord_array1, _ = process_frame_without_video_output(file_path1)
+    world_coord_array2, _ = process_frame_without_video_output(file_path2)
 
     joint_idx = 15
     x_goal = world_coord_array2[:, joint_idx, 0]
@@ -64,7 +64,7 @@ def createCorrectionVideo(file_path1, file_path2):
                 y_goal_frame = np.array([y_goal[frame_idx]])
 
                 try:
-                    output = run_regression(x_goal_frame, y_goal_frame, x_cor_frame, y_cor_frame, iterations, change_array)
+                    output = actual_model_modified(world_coord_array1, world_coord_array2)
                 except Exception as e:
                     print(f"Error during regression: {e}")
                 correctedSet = createCorrectedSet(output)
@@ -107,8 +107,8 @@ def createCorrectionVideo(file_path1, file_path2):
 
 # Example usage
 if(__name__ == "__main__"):
-    file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
-    file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
+    file_path1 = r"team-82-FormCorrect/uploads/SomeGuySquatting.mp4"
+    file_path2 = r"team-82-FormCorrect/uploads/BuffGuySquatting.mp4"
     createCorrectionVideo(file_path1, file_path2)
 
 

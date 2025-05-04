@@ -675,6 +675,21 @@ def actual_model(video_base: str, video_user: str): # CALLLLLLLLLLLLL THISSSSSSS
     return strings, outputs # this whole thing takes like 5-6 minutes to run
         # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
 
+def actual_model_modified(world_coord_base, world_coord_user): # CALLLLLLLLLLLLL THISSSSSSSSSSS it takes two strings which are the addresses to the mp4s 
+                                                    #and returns a list of strings and a list of outputs which have the best dist, theta_x, theta_y, theta_z and best nodes
+    plt.close("all")
+
+    new_base, new_user = transform_coords(world_coord_base, world_coord_user)
+    graph_base = create_graph(new_base)
+    graph_user = create_graph(new_user)
+
+    strings,outputs = frame_iterator(
+        new_base, new_user, graph_base, graph_user, new_base.shape[0], 20
+    )
+    
+    return strings, outputs # this whole thing takes like 5-6 minutes to run
+        # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
+
 def fake_actual_model(): # for testing purposes - preloads the numpy arrays from soohwans model so that this process doesn't have to occur every time. 
     load_numpy_array_base = np.load(r"team-82-FormCorrect\uploads\GuySquatArray.npz")
     load_numpy_array_user = np.load(r"team-82-FormCorrect\uploads\BuffSquatArray.npz")
@@ -693,12 +708,12 @@ def fake_actual_model(): # for testing purposes - preloads the numpy arrays from
     return strings, outputs, new_base, new_user # this whole thing takes like 5-6 minutes to run
         # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
 
-def load_video_to_npz(video_file_base: str, video_file_user: str):
-    world_coord_base, edges_array_base = pose.process_frame_without_video_output(video_file_base)
-    world_coord_user, edges_array_user = pose.process_frame_without_video_output(video_file_user)
+# def load_video_to_npz(video_file_base: str, video_file_user: str):
+#     world_coord_base, edges_array_base = pose.process_frame_without_video_output(video_file_base)
+#     world_coord_user, edges_array_user = pose.process_frame_without_video_output(video_file_user)
 
-    np.savez(r'team-82-FormCorrect\uploads\GuySquatArray.npz', world = world_coord_base, edge = edges_array_base)
-    np.savez(r'team-82-FormCorrect\uploads\BuffSquatArray.npz', world = world_coord_user, edge = edges_array_user)
+#     np.savez(r'team-82-FormCorrect\uploads\GuySquatArray.npz', world = world_coord_base, edge = edges_array_base)
+#     np.savez(r'team-82-FormCorrect\uploads\BuffSquatArray.npz', world = world_coord_user, edge = edges_array_user)
 
 def main():
 
