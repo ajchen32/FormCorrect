@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 import os
-from pose import proccess_frame
 from recursiveregressionmodel import actual_model
 import mediapipe as mp
+import matplotlib
+matplotlib.use('Agg')  # Use a non-interactive backend
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
@@ -71,10 +72,12 @@ def createCorrectionVideo(file_path1, file_path2):
     os.makedirs(output_dir, exist_ok=True)
     output_file_path = os.path.join(output_dir, os.path.basename(file_path1))
 
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Alternative codec
+    fourcc = cv2.VideoWriter_fourcc(*'H264')  # Alternative codec
     out = cv2.VideoWriter(output_file_path, fourcc, fps, (frame_width, frame_height))
     strings = []
     frame_idx = 0
+    strings, output = actual_model(file_path2, file_path1)
+    correctedSet = createCorrectedSet(strings)
     with mp_pose.Pose(
     static_image_mode=True,
     model_complexity=2,
@@ -84,31 +87,13 @@ def createCorrectionVideo(file_path1, file_path2):
             while True:
                 ret, frame = cap.read()
                 if not ret:
-                    break
-
-
-                try:
-                    strings, output = actual_model(file_path2, file_path1)
-                except Exception as e:
-                    print(file_path1, file_path2)
-                    print(f"Error during regression: {e}")
-                correctedSet = createCorrectedSet(output)
-                # height, width, _ = frame.shape
-                # for i in range(iterations):
-                #     x_suggested = np.clip(int(x_cor_frame[0] * width), 0, width - 1)
-                #     y_suggested = np.clip(int(y_cor_frame[0] * height), 0, height - 1)
-                #     cv2.circle(frame, (x_suggested, y_suggested), 5, (0, 255, 0), -1)
-
-                # x_original = np.clip(int(x_cor[frame_idx] * width), 0, width - 1)
-                # y_original = np.clip(int(y_cor[frame_idx] * height), 0, height - 1)
-                # cv2.circle(frame, (x_original, y_original), 5, (0, 0, 255), -1)
-                
+                    break    
                 results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 annotated_image = frame.copy()
                 # Draw segmentation on the image.
                 # To improve segmentation around boundaries, consider applying a joint
                 # bilateral filter to "results.segmentation_mask" with "image"
-
+                
                 
                 condition = True #np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
                 bg_image = np.zeros(frame.shape, dtype=np.uint8)
@@ -118,11 +103,17 @@ def createCorrectionVideo(file_path1, file_path2):
                     connection for connection in mp_pose.POSE_CONNECTIONS
                     if connection[0] in correctedSet or connection[1] in correctedSet
                 ]
+                #filter the landmarks to only show the ones in the corrected set
+                filtered_landmarks = [
+                    results.pose_landmarks.landmark[idx]
+                    for idx in correctedSet if idx < len(results.pose_landmarks.landmark)
+                ]
                 mp_drawing.draw_landmarks(
                     annotated_image,
                     results.pose_landmarks,
-                    filtered_connections,
-                    landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+                    mp_pose.POSE_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style(),
+                )
                 out.write(annotated_image)
                 frame_idx += 1
         finally:
@@ -132,7 +123,7 @@ def createCorrectionVideo(file_path1, file_path2):
             return strings
 
 # Example usage
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
     file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
     print(createCorrectionVideo(file_path1, file_path2))

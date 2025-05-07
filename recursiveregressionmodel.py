@@ -511,7 +511,6 @@ def frame_iterator(
     string_list = []
     output_list = []
     for f in range(frames):
-        print(f)
         total_output = every_rotation(
                 world_coord_base,
                 world_coord_user,
@@ -660,7 +659,7 @@ def plot_output(world_coord_base: np.array, world_coord_user: np.array, strings,
 
 def actual_model(video_base: str, video_user: str): # CALLLLLLLLLLLLL THISSSSSSSSSSS it takes two strings which are the addresses to the mp4s 
                                                     #and returns a list of strings and a list of outputs which have the best dist, theta_x, theta_y, theta_z and best nodes
-    plt.close("all")
+    #plt.close("all")
     world_coord_base, edges_array_base = pose.process_frame_without_video_output(video_base)
     world_coord_user, edges_array_user = pose.process_frame_without_video_output(video_user)
 
