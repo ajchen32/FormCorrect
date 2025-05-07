@@ -1,6 +1,6 @@
 import os
 import requests
-from requests_toolbelt.multipart.decoder import MultipartDecoder
+import base64
 import json
 
 def main():
@@ -18,7 +18,7 @@ def main():
         return
 
     # Step 2: Send two MP4 files to the upload endpoint
-    upload_url = "http://localhost:5000/generate-video"
+    upload_url = "http://localhost:5000/upload"
     model_dir = "./model"
     files = [f for f in os.listdir(model_dir) if f.endswith(".mp4")]
 
@@ -37,22 +37,27 @@ def main():
                 "file2": (files[1], f2, "video/mp4"),
             }
             upload_response = requests.post(upload_url, files=files_payload)
-            if upload_response.status_code == 200:
-                # Parse the multipart response
-                content_type = upload_response.headers.get('Content-Type')
-                decoder = MultipartDecoder.from_response(upload_response)
 
-                # Extract parts from the multipart response
-                for part in decoder.parts:
-                    content_disposition = part.headers.get(b'Content-Disposition', b'').decode()
-                    if 'name="textCorrections"' in content_disposition:
-                        text_corrections = json.loads(part.text)  # Parse as JSON
-                        print(f"Text Corrections: {text_corrections}")
-                    elif 'name="file"' in content_disposition:
-                        output_file_path = "./output_video.mp4"
-                        with open(output_file_path, "wb") as output_file:
-                            output_file.write(part.content)
-                        print(f"Output video saved to {output_file_path}")
+            if upload_response.status_code == 200:
+                # Parse the JSON response
+                response_data = upload_response.json()
+                text_corrections = response_data.get("textCorrections", [])
+                video_base64 = response_data.get("videoBase64", "")
+
+                # Print the text corrections
+                print("Text Corrections:")
+                for correction in text_corrections:
+                    print(f"- {correction}")
+
+                # Decode and save the video
+                if video_base64:
+                    video_data = base64.b64decode(video_base64)
+                    output_file_path = "output_file.mp4"
+                    with open(output_file_path, "wb") as output_file:
+                        output_file.write(video_data)
+                    print(f"Video saved as {output_file_path}")
+                else:
+                    print("No video data found in the response.")
             else:
                 print(f"Failed to upload files: {upload_response.status_code}, {upload_response.text}")
     except Exception as e:

@@ -6,7 +6,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+import os
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -15,9 +15,14 @@ from scipy import linalg as la
 # from numpy import linalg
 
 #r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+
+#model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+print(model_path)
+=======
 #model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 
 model_path = r"team-82-FormCorrect\UTF-8pose_landmarker_heavy.task"
+
 
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
@@ -25,7 +30,7 @@ PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
 setup = PoseLandmarkerOptions(
-    base_options=BaseOptions(model_asset_path=model_path),
+    base_options=BaseOptions(model_asset_path=os.path.abspath(model_path)),
     running_mode=VisionRunningMode.VIDEO,
     num_poses=1,
     min_pose_detection_confidence=0.5,
