@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import os
 from recursiveregressionmodel import actual_model
+from pose import process_frame_without_video_output
+from recursiveregressionmodel import plot_output, actual_model, fake_actual_model, actual_model_modified
+
 import mediapipe as mp
 import matplotlib
 matplotlib.use('Agg')  # Use a non-interactive backend
@@ -56,6 +59,7 @@ def createCorrectedSet(strings):
 def createCorrectionVideo(file_path1, file_path2):
 
 
+
     cap = cv2.VideoCapture(file_path1)
     if not cap.isOpened():
         raise ValueError("Could not open video file.")
@@ -87,7 +91,36 @@ def createCorrectionVideo(file_path1, file_path2):
             while True:
                 ret, frame = cap.read()
                 if not ret:
+
                     break    
+
+#                     break
+
+#                 if frame_idx >= len(x_cor) or frame_idx >= len(y_cor):
+#                     print("Frame index exceeds coordinate array length. Stopping.")
+#                     break
+
+#                 x_cor_frame = np.array([x_cor[frame_idx]])
+#                 y_cor_frame = np.array([y_cor[frame_idx]])
+#                 x_goal_frame = np.array([x_goal[frame_idx]])
+#                 y_goal_frame = np.array([y_goal[frame_idx]])
+
+#                 try:
+#                     output = actual_model_modified(world_coord_array1, world_coord_array2)
+#                 except Exception as e:
+#                     print(f"Error during regression: {e}")
+#                 correctedSet = createCorrectedSet(output)
+                # height, width, _ = frame.shape
+                # for i in range(iterations):
+                #     x_suggested = np.clip(int(x_cor_frame[0] * width), 0, width - 1)
+                #     y_suggested = np.clip(int(y_cor_frame[0] * height), 0, height - 1)
+                #     cv2.circle(frame, (x_suggested, y_suggested), 5, (0, 255, 0), -1)
+
+                # x_original = np.clip(int(x_cor[frame_idx] * width), 0, width - 1)
+                # y_original = np.clip(int(y_cor[frame_idx] * height), 0, height - 1)
+                # cv2.circle(frame, (x_original, y_original), 5, (0, 0, 255), -1)
+                
+
                 results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 annotated_image = frame.copy()
                 # Draw segmentation on the image.
@@ -123,10 +156,17 @@ def createCorrectionVideo(file_path1, file_path2):
             return strings
 
 # Example usage
+
 if __name__ == "__main__":
     file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
     file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
     print(createCorrectionVideo(file_path1, file_path2))
+
+# if(__name__ == "__main__"):
+#     file_path1 = r"team-82-FormCorrect/uploads/SomeGuySquatting.mp4"
+#     file_path2 = r"team-82-FormCorrect/uploads/BuffGuySquatting.mp4"
+#     createCorrectionVideo(file_path1, file_path2)
+
 
 
 

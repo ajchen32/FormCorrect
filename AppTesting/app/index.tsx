@@ -14,6 +14,8 @@ export default function VideoUploader() {
         file: null,
         text: "placeholder",
     });
+    const [outputURL, setOutputURL] = useState<string | null>(null);
+
     // Do something if selected a different file
     const LoadFile = (event: any, index: number) => {
         if (event) {
@@ -43,7 +45,6 @@ export default function VideoUploader() {
     };
 
     const UploadVideo = async () => {
-        // Create a FormData object to send the file
         const formData = new FormData();
         for (let i = 0; i < videoFile.length; i++) {
             if (videoFile[i] != null) {
@@ -58,13 +59,31 @@ export default function VideoUploader() {
             });
 
             if (response.ok) {
-                alert(`File uploaded successfully!`);
+                const data = await response.json();
+                // data.textCorrections: array of strings
+                // data.videoBase64: base64 string
+                // data.videoMimeType: e.g. "video/mp4"
 
-                let curr_output: videoOutput = output;
-                curr_output.file = videoFile[0];
-                curr_output.text = "Testing";
+                // Convert base64 to Blob
+                const byteCharacters = atob(data.videoBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const videoBlob = new Blob([byteArray], { type: data.videoMimeType || "video/mp4" });
+
+                let curr_output: videoOutput = {
+                    file: videoBlob,
+                    text: Array.isArray(data.textCorrections) ? data.textCorrections.join("\n") : String(data.textCorrections),
+                };
                 setOutput(curr_output);
-                console.log(output);
+                console.log("Output:", curr_output);
+
+                if (videoBlob) {
+                    const url = URL.createObjectURL(videoBlob);
+                    setOutputURL(url);
+                }
             } else {
                 alert(`Failed to upload file.`);
             }
@@ -149,17 +168,24 @@ export default function VideoUploader() {
                     }
                 </View>
             )}
-            {output.file != null && (
+            {output.file != null && outputURL && (
                 <View style={styles.upload_container}>
                     <Text style={styles.title}>Output</Text>
                     <video
-                            width="600"
-                            height="400"
-                            controls
-                            src={URL.createObjectURL(output.file)} // Set the video source to the URL created with createObjectURL
-                        >
-                            Your browser does not support the video tag.
+                        width="600"
+                        height="400"
+                        controls
+                        src={outputURL}
+                    >
+                        Your browser does not support the video tag.
                     </video>
+                    <a
+                        href={outputURL}
+                        download="output_video.mp4"
+                        style={{ marginTop: 16, display: "inline-block", fontSize: 18 }}
+                    >
+                        Download Video
+                    </a>
                     <Text style={styles.output_text}> {output.text}</Text>
                 </View>
             )}

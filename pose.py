@@ -15,8 +15,15 @@ from scipy import linalg as la
 # from numpy import linalg
 
 #r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
-model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+
+#model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 print(model_path)
+=======
+#model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
+
+model_path = r"team-82-FormCorrect\UTF-8pose_landmarker_heavy.task"
+
+
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
 PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
@@ -348,8 +355,8 @@ ax.set_xlabel("X (meters)")
 ax.set_ylabel("Y (meters)")
 ax.set_zlabel("Z (meters)")
 ax.set_title("BlazePose 3D World Landmarks (Tasks API)")
-if(__name__ == "__main__"):
-    world_array, edge_array = proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
+
+   # world_array, edge_array = proccess_frame("c:/Users/soohw/Downloads/pose_test_2.mp4")
 
 
 
@@ -390,7 +397,7 @@ def covaraince_matrix(video_file):
 
 def main():
     #choose one
-    video_file = "team-82-FormCorrect\SomeGuySquatting.mp4"
+    video_file = r"team-82-FormCorrect\uploads\SomeGuySquatting.mp4"
     #video_file = "team-82-FormCorrect\GuyMovingArms.mp4"
 
     #world_coord_array, edges_array = proccess_frame(video_file)
