@@ -18,7 +18,7 @@ from scipy import linalg as la
 
 #model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 print(model_path)
-=======
+
 #model_path = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\pose_landmarker_full.task"
 
 model_path = r"team-82-FormCorrect\UTF-8pose_landmarker_heavy.task"
