@@ -100,6 +100,8 @@ ml-dtypes==0.5.1
     #   tensorflow
 namex==0.0.8
     # via keras
+networkx==3.4.2
+    # via -r requirements.in
 numpy==1.26.4
     # via
     #   -r requirements.in
