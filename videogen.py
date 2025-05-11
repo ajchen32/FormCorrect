@@ -2,9 +2,6 @@ import cv2
 import numpy as np
 import os
 from recursiveregressionmodel import actual_model
-from pose import process_frame_without_video_output
-from recursiveregressionmodel import plot_output, actual_model, fake_actual_model, actual_model_modified
-
 import mediapipe as mp
 import matplotlib
 matplotlib.use('Agg')  # Use a non-interactive backend
@@ -80,7 +77,7 @@ def createCorrectionVideo(file_path1, file_path2):
     out = cv2.VideoWriter(output_file_path, fourcc, fps, (frame_width, frame_height))
     strings = []
     frame_idx = 0
-    strings, output = actual_model(file_path2, file_path1)
+    strings, output, plot1, plot2, plot3 = actual_model(file_path2, file_path1)
     correctedSet = createCorrectedSet(strings)
     with mp_pose.Pose(
     static_image_mode=True,
@@ -153,20 +150,24 @@ def createCorrectionVideo(file_path1, file_path2):
             cap.release()
             out.release()
             print(f"Video saved at {output_file_path}")
-            return strings
+            return strings, plot1, plot2, plot3
 
 # Example usage
 
-if __name__ == "__main__":
-    file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
-    file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
-    print(createCorrectionVideo(file_path1, file_path2))
+# if __name__ == "__main__":
+#     file_path1 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_29_Pro.mp4"
+#     file_path2 = r"C:\Users\dhruv\OneDrive\Documents\GitHub\team-82-FormCorrect\model\WIN_20250404_16_16_40_Pro.mp4"
+#     print(createCorrectionVideo(file_path1, file_path2))
 
 # if(__name__ == "__main__"):
 #     file_path1 = r"team-82-FormCorrect/uploads/SomeGuySquatting.mp4"
 #     file_path2 = r"team-82-FormCorrect/uploads/BuffGuySquatting.mp4"
-#     createCorrectionVideo(file_path1, file_path2)
+#     print(createCorrectionVideo(file_path1, file_path2))
 
+if(__name__ == "__main__"):
+    file_path1 = r"team-82-FormCorrect/uploads/GirlDancingGif.mp4"
+    file_path2 = r"team-82-FormCorrect/uploads/GuyDancingGif.mp4"
+    print(createCorrectionVideo(file_path1, file_path2))
 
 
 

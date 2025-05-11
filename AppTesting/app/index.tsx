@@ -4,7 +4,14 @@ import { View, Text, Button, StyleSheet, Platform, Alert } from "react-native";
 interface videoOutput {
     file: any;
     text: string;
+    plots: Plot[];
 }
+interface Plot {
+    imageBase64: string;
+    mimeType: string;
+}
+
+
 
 export default function VideoUploader() {
     const [videoFile, setVideoFile] = useState(Array<any>);
@@ -13,6 +20,7 @@ export default function VideoUploader() {
     const [output, setOutput] = useState<videoOutput>({
         file: null,
         text: "placeholder",
+        plots: [],
     });
     const [outputURL, setOutputURL] = useState<string | null>(null);
 
@@ -76,6 +84,7 @@ export default function VideoUploader() {
                 let curr_output: videoOutput = {
                     file: videoBlob,
                     text: Array.isArray(data.textCorrections) ? data.textCorrections.join("\n") : String(data.textCorrections),
+                    plots: data.plots,
                 };
                 setOutput(curr_output);
                 console.log("Output:", curr_output);
@@ -186,7 +195,20 @@ export default function VideoUploader() {
                     >
                         Download Video
                     </a>
-                    <Text style={styles.output_text}> {output.text}</Text>
+                    <p>{output.text}</p>
+
+                    <div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    {output.plots.map((plot, index) => (
+        <img
+            key={index}
+            src={`data:${plot.mimeType};base64,${plot.imageBase64}`}
+            alt={`Plot ${index + 1}`}
+            style={{ maxWidth: 1000, marginBottom: 20 }}
+        />
+    ))}
+</div>
+                    </div>
                 </View>
             )}
         </div>
