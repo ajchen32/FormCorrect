@@ -48,8 +48,7 @@ def generate_video():
     output_file_path = os.path.join(app.config['OUTPUT_FOLDER'], file1.filename)
     textCorrections = ["Failed to generate video"]
     try:
-        print("FUCK")
-        textCorrections = createCorrectionVideo(file1_path, file2_path)
+        textCorrections, plot1, plot2, plot3 = createCorrectionVideo(file1_path, file2_path)
     except Exception as e:
         print(f"Error generating video: {e}")
         traceback.print_exc()
@@ -60,12 +59,20 @@ def generate_video():
         textCorrections = ["Failed to generate video"]
     # Send the generated video back to the caller
     video_base64 = base64.b64encode(video_data).decode('utf-8')
+    plot1_base64 = base64.b64encode(plot1.read()).decode('utf-8')
+    plot2_base64 = base64.b64encode(plot2.read()).decode('utf-8')
+    plot3_base64 = base64.b64encode(plot3.read()).decode('utf-8')
     #print byte size of video_data for debugging
     print(f"Video data size: {len(video_data)} bytes")
     response = {
         "textCorrections": textCorrections,
         "videoBase64": video_base64,
-        "videoMimeType": "video/mp4"  # e.g., "video/mp4"
+        "videoMimeType": "video/mp4",
+        "plots" : [
+        {"imageBase64": plot1_base64, "mimeType": "image/png"},
+        {"imageBase64": plot2_base64, "mimeType": "image/png"},
+        {"imageBase64": plot3_base64, "mimeType": "image/png"}
+    ]
     }
     return jsonify(response)
 
