@@ -5,9 +5,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import copy
 import networkx as nx
 from collections import deque
+import heapq
 import pose
+import io
 
-# Some chatgpt used for equations of projection and rotation as well as small editing
+# Some chatgpt used for equations of projection and rotation as well as small editing and formatting
 memo = {}
 
 class Point:
@@ -467,7 +469,7 @@ def iterative_rotation(
     #     graph_user, temp_graph, graph_base, i + 1
     # )  # 1 red, 2 blue, 3 green
 
-    return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point
+    return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point, get_dist(graph_base, graph_user, i)
 
 
 def every_rotation(
@@ -671,25 +673,14 @@ def actual_model(video_base: str, video_user: str): # CALLLLLLLLLLLLL THISSSSSSS
         new_base, new_user, graph_base, graph_user, new_base.shape[0], 20
     )
     
-    return strings, outputs # this whole thing takes like 5-6 minutes to run
+    new_strings, plot1, plot2, plot3 = create_final_output_plots(outputs)
+    return new_strings, outputs, plot1, plot2, plot3# this whole thing takes like 5-6 minutes to run
         # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
 
-def actual_model_modified(world_coord_base, world_coord_user): # CALLLLLLLLLLLLL THISSSSSSSSSSS it takes two strings which are the addresses to the mp4s 
-                                                    #and returns a list of strings and a list of outputs which have the best dist, theta_x, theta_y, theta_z and best nodes
-    plt.close("all")
 
-    new_base, new_user = transform_coords(world_coord_base, world_coord_user)
-    graph_base = create_graph(new_base)
-    graph_user = create_graph(new_user)
-
-    strings,outputs = frame_iterator(
-        new_base, new_user, graph_base, graph_user, new_base.shape[0], 20
-    )
-    
-    return strings, outputs # this whole thing takes like 5-6 minutes to run
-        # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
 
 def fake_actual_model(): # for testing purposes - preloads the numpy arrays from soohwans model so that this process doesn't have to occur every time. 
+
     load_numpy_array_base = np.load(r"team-82-FormCorrect\uploads\GuySquatArray.npz")
     load_numpy_array_user = np.load(r"team-82-FormCorrect\uploads\BuffSquatArray.npz")
 
@@ -703,29 +694,201 @@ def fake_actual_model(): # for testing purposes - preloads the numpy arrays from
     strings,outputs = frame_iterator(
         new_base, new_user, graph_base, graph_user, new_base.shape[0], 20
     )
-    
-    return strings, outputs, new_base, new_user # this whole thing takes like 5-6 minutes to run
+    new_strings = create_understandable_string_output(strings, outputs)
+    return new_strings, outputs, new_base, new_user, strings # this whole thing takes like 5-6 minutes to run
         # return get_dist(graph_base, temp_graph, i), theta_x, theta_y, theta_z, rotate_point ---- this is what outputs has
+def create_understandable_string_output(strings, outputs):
+    body_parts = {
+        0: "nose",
+        1: "left eye (inner)",
+        2: "left eye",
+        3: "left eye (outer)",
+        4: "right eye (inner)",
+        5: "right eye",
+        6: "right eye (outer)",
+        7: "left ear",
+        8: "right ear",
+        9: "mouth (left)",
+        10: "mouth (right)",
+        11: "left shoulder",
+        12: "right shoulder",
+        13: "left elbow",
+        14: "right elbow",
+        15: "left wrist",
+        16: "right wrist",
+        17: "left pinky",
+        18: "right pinky",
+        19: "left index",
+        20: "right index",
+        21: "left thumb",
+        22: "right thumb",
+        23: "left hip",
+        24: "right hip",
+        25: "left knee",
+        26: "right knee",
+        27: "left ankle",
+        28: "right ankle",
+        29: "left heel",
+        30: "right heel",
+        31: "left foot index",
+        32: "right foot index",
+    }
+    return_string = [] # list of strings
 
+    inputs_tracker = [0] * 33
+    
+    for object in outputs:
+        inputs_tracker[object[4]] += 1
+    
+    indexed_list = list(enumerate(inputs_tracker))
+
+    largest = heapq.nlargest(5, indexed_list, key=lambda x: x[1])
+
+    indices = [idx for idx, val in largest]
+    actual = [val for idx, val in largest]
+    return_string.append("Problem Points (areas that need most correction):")
+    for i, a, num in zip(indices, actual, range(len(indices))):
+        return_string.append(str(num+1) + "." + " " + str(body_parts[i]) + " - " + str(round((a/len(strings))*100,2)) + "%")
+
+    return return_string
+
+#Used chatgpt for plot setup
+def create_final_output_plots(outputs):
+    #plot1 is a line plot of how diferent the results are from what they should be
+    x = []
+    y = []
+    max_val =  max(outputs, key=lambda x: x[5])
+    max_val = max_val[5]
+    for o, i in zip(outputs, range(len(outputs))):
+        x.append(i/30) # this is the time in seconds
+        y.append(o[5]/max_val) # this is normalized so max is 1
+    
+
+    fig, ax = plt.subplots()
+    ax.plot(x, y, marker='o', linestyle='-', color='b', label='Line')
+    ax.set_title("Overall Difference From Original Over Time")
+    ax.set_xlabel("Seconds")
+    ax.set_ylabel("How Far Off")
+    ax.legend()
+
+    # Save plot to in-memory buffer
+    plot1 = io.BytesIO()
+    fig.savefig(plot1, format='png')
+    plot1.seek(0)  # Rewind buffer to the beginning
+    plt.close(fig)  # Close the figure to free up memory
+
+    body_parts = {
+        0: "nose",
+        1: "left eye (inner)",
+        2: "left eye",
+        3: "left eye (outer)",
+        4: "right eye (inner)",
+        5: "right eye",
+        6: "right eye (outer)",
+        7: "left ear",
+        8: "right ear",
+        9: "mouth (left)",
+        10: "mouth (right)",
+        11: "left shoulder",
+        12: "right shoulder",
+        13: "left elbow",
+        14: "right elbow",
+        15: "left wrist",
+        16: "right wrist",
+        17: "left pinky",
+        18: "right pinky",
+        19: "left index",
+        20: "right index",
+        21: "left thumb",
+        22: "right thumb",
+        23: "left hip",
+        24: "right hip",
+        25: "left knee",
+        26: "right knee",
+        27: "left ankle",
+        28: "right ankle",
+        29: "left heel",
+        30: "right heel",
+        31: "left foot index",
+        32: "right foot index",
+    }
+
+    inputs_tracker = [0] * 33
+    
+    for o in outputs:
+        inputs_tracker[o[4]] += 1
+    
+    indexed_list = list(enumerate(inputs_tracker))
+
+    largest = heapq.nlargest(5, indexed_list, key=lambda x: x[1])
+
+    indices = [body_parts[idx] for idx, val in largest]
+    actual = [round((val/len(outputs))*100,2) for idx, val in largest]
+    
+    fig2, ax2 = plt.subplots()
+    ax2.bar(indices, actual, color='skyblue', edgecolor='black')
+    ax2.set_title("Most Problematic Points")
+    ax2.set_xlabel("Body Parts (joints)")
+    ax2.set_ylabel("Percent of Time Most Far Off")
+    ax2.legend()
+    plot2 = io.BytesIO()
+    fig2.savefig(plot2, format='png')
+    plot2.seek(0)
+    plt.close(fig2)
+
+    # Plot 3
+    y3 = []
+    for o in outputs:
+        y3.append(o[4])
+    
+    fig3, ax3 = plt.subplots()
+    ax3.plot(x, y3, marker='o', linestyle='-', color='b', label='Line')
+    ax3.set_title("Determine Body Part Furthest Off At Given Time")
+    ax3.set_yticks(list(body_parts.keys()))
+    ax3.set_yticklabels(list(body_parts.values()))
+    ax3.set_xlabel("Seconds")
+    ax3.set_ylabel("Body Part Furthest Off")
+    ax3.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
+    ax3.legend()
+    plot3 = io.BytesIO()
+    fig3.savefig(plot3, format='png', bbox_inches='tight')
+    plot3.seek(0)
+    plt.close(fig3)
+
+    final_output_help = zip(x,y)
+    bigger = heapq.nlargest(3, final_output_help, key=lambda x: x[1])
+
+    bigger = [val for val, _ in bigger]
+
+
+
+    new_strings = []
+    new_strings.append("Summary: ")
+    new_strings.append("You can improve your form most by focusing on your " + str(indices[0]) + " and " + str(indices[1]) + " throughout.")
+    new_strings.append("Timestamps at " + str(round(bigger[0],2)) + ", " + str(round(bigger[1],2)) + ", and " + str(round(bigger[2], 2)) + " seconds are general problem spots.")
+
+    return new_strings, plot1, plot2, plot3 
 # def load_video_to_npz(video_file_base: str, video_file_user: str):
 #     world_coord_base, edges_array_base = pose.process_frame_without_video_output(video_file_base)
 #     world_coord_user, edges_array_user = pose.process_frame_without_video_output(video_file_user)
 
 #     np.savez(r'team-82-FormCorrect\uploads\GuySquatArray.npz', world = world_coord_base, edge = edges_array_base)
 #     np.savez(r'team-82-FormCorrect\uploads\BuffSquatArray.npz', world = world_coord_user, edge = edges_array_user)
-
+    
 def main():
 
     plt.close("all")  # closes soohwans stuff
 
-    video_file_base = r"team-82-FormCorrect\uploads\SomeGuySquatting.mp4"
-    video_file_user = r"team-82-FormCorrect\uploads\BuffGuySquatting.mp4"
+    # video_file_base = r"team-82-FormCorrect\uploads\SomeGuySquatting.mp4"
+    # video_file_user = r"team-82-FormCorrect\uploads\BuffGuySquatting.mp4"
+    file_path1 = r"team-82-FormCorrect/uploads/GirlDancingGif.mp4"
+    file_path2 = r"team-82-FormCorrect/uploads/GuyDancingGif.mp4"
     # video_file = "team-82-FormCorrect\GuyMovingArms.mp4"
 
     
-    strings, outputs, new_base, new_user = fake_actual_model()
+    new_strings, outputs, strings, new_base, new_user  = actual_model(file_path1, file_path2)
 
-    print(strings)
+    print(new_strings)
     print(outputs)
 
     plot_output(new_base, new_user, strings, outputs)
