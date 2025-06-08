@@ -11,7 +11,7 @@ To run backend, you will need npm, and python.
 Set-up a conda env using the .environment file to run the python file. 
 
 # Technical Analysis
-![image](https://github.com/user-attachments/assets/e335aa20-0083-4296-8856-ee6a9f244d10)
+![Alt text](uploads/image.png)
 
 # Developers 
 Chi Jay Xu: UI and Web-app development
